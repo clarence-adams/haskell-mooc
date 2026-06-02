@@ -316,4 +316,14 @@ multiApp f gs x = f [g x | g <- gs]
 
 interpreter :: [String] -> [String]
 interpreter [] = []
-interpreter ("up":xs) = 
+interpreter commands = filter (\x -> x /= "") (readInput (0, 0) commands) 
+
+readInput :: (Integer, Integer) -> [String] -> [String]
+readInput start [] = []
+readInput start ("printX":xs) = (show (fst start)) : readInput start xs
+readInput start ("printY":xs) = (show (snd start)) : readInput start xs
+readInput start ("up":xs) = [] : readInput (fst start, (snd start) + 1) xs
+readInput start ("down":xs) = [] : readInput (fst start, (snd start) - 1) xs
+readInput start ("left":xs) = [] : readInput ((fst start) - 1, snd start) xs
+readInput start ("right":xs) = [] : readInput ((fst start) + 1, snd start) xs
+
