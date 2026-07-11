@@ -15,7 +15,8 @@ data Tree a = Empty | Node a (Tree a) (Tree a)
 -- because the tree might be empty (i.e. just a Empty)
 
 valAtRoot :: Tree a -> Maybe a
-valAtRoot t = todo
+valAtRoot Empty = Nothing
+valAtRoot (Node a _ _) = Just a
 
 ------------------------------------------------------------------------------
 -- Ex 2: compute the size of a tree, that is, the number of Node
@@ -26,7 +27,8 @@ valAtRoot t = todo
 --   treeSize (Node 3 (Node 7 Empty Empty) (Node 1 Empty Empty))  ==>  3
 
 treeSize :: Tree a -> Int
-treeSize t = todo
+treeSize Empty = 0
+treeSize (Node a b c) = 1 + treeSize b + treeSize c
 
 ------------------------------------------------------------------------------
 -- Ex 3: get the largest value in a tree of positive Ints. The
@@ -37,7 +39,16 @@ treeSize t = todo
 --   treeMax (Node 3 (Node 5 Empty Empty) (Node 4 Empty Empty))  ==>  5
 
 treeMax :: Tree Int -> Int
-treeMax = todo
+treeMax t = getMax t 0
+  where
+    getMax Empty i = i
+    getMax (Node a b c) i
+      | nextB > nextC = nextB
+      | otherwise = nextC
+      where
+        acc = if a > i then a else i
+        nextB = getMax b acc
+        nextC = getMax c acc
 
 ------------------------------------------------------------------------------
 -- Ex 4: implement a function that checks if all tree values satisfy a
@@ -49,7 +60,10 @@ treeMax = todo
 --   allValues (>0) (Node 1 Empty (Node 0 Empty Empty))  ==>  False
 
 allValues :: (a -> Bool) -> Tree a -> Bool
-allValues condition tree = todo
+allValues condition Empty = True
+allValues condition (Node a b c)
+  | condition a == False = False
+  | otherwise = allValues condition b && allValues condition c
 
 ------------------------------------------------------------------------------
 -- Ex 5: implement map for trees.
@@ -61,7 +75,8 @@ allValues condition tree = todo
 --   ==> (Node 2 (Node 3 Empty Empty) (Node 4 Empty Empty))
 
 mapTree :: (a -> b) -> Tree a -> Tree b
-mapTree f t = todo
+mapTree f Empty = Empty
+mapTree f (Node a b c) = Node (f a) (mapTree f b) (mapTree f c)
 
 ------------------------------------------------------------------------------
 -- Ex 6: given a value and a tree, build a new tree that is the same,
