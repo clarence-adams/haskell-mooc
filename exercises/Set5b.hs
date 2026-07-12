@@ -120,7 +120,10 @@ mapTree f (Node a b c) = Node (f a) (mapTree f b) (mapTree f c)
 --                 (Node 3 Empty Empty))
 
 cull :: Eq a => a -> Tree a -> Tree a
-cull val tree = todo
+cull val Empty = Empty
+cull val (Node a b c)
+  | a == val = Empty
+  | otherwise = Node a (cull val b) (cull val c)
 
 ------------------------------------------------------------------------------
 -- Ex 7: check if a tree is ordered. A tree is ordered if:
@@ -162,7 +165,12 @@ cull val tree = todo
 --                     (Node 3 Empty Empty))   ==>   True
 
 isOrdered :: Ord a => Tree a -> Bool
-isOrdered = todo
+isOrdered Empty = True
+isOrdered (Node a b c)
+  | check == False = False
+  | otherwise = isOrdered b && isOrdered c
+  where
+    check = allValues (<a) b && allValues (>a) c
 
 ------------------------------------------------------------------------------
 -- Ex 8: a path in a tree can be represented as a list of steps that
@@ -181,7 +189,10 @@ data Step = StepL | StepR
 --   walk [StepL,StepL] (Node 1 (Node 2 Empty Empty) Empty)  ==>  Nothing
 
 walk :: [Step] -> Tree a -> Maybe a
-walk = todo
+walk _ Empty = Nothing
+walk [] (Node a b c) = Just a
+walk (StepL:xs) (Node a b c) = walk xs b
+walk (StepR:xs) (Node a b c) = walk xs c
 
 ------------------------------------------------------------------------------
 -- Ex 9: given a tree, a path and a value, set the value at the end of
@@ -202,7 +213,14 @@ walk = todo
 --   set [StepL,StepR] 1 (Node 0 Empty Empty)  ==>  (Node 0 Empty Empty)
 
 set :: [Step] -> a -> Tree a -> Tree a
-set path val tree = todo
+set _ val Empty = Empty
+set [] val (Node a b c) = Node val (build b) (build c)
+set (StepL:xs) val (Node a b c) = Node a (set xs val b) (build c)
+set (StepR:xs) val (Node a b c) = Node a (build b) (set xs val c)
+
+-- Function for just building a tree, not setting anything
+build Empty = Empty
+build (Node a b c) = Node a (build b) (build c)
 
 ------------------------------------------------------------------------------
 -- Ex 10: given a value and a tree, return a path that goes from the
@@ -218,4 +236,17 @@ set path val tree = todo
 --                    (Node 5 Empty Empty))                     ==>  Just [StepL,StepR]
 
 search :: Eq a => a -> Tree a -> Maybe [Step]
-search = todo
+search _ Empty = Nothing
+search val tree = search' val tree []
+
+search' val Empty steps = Nothing
+search' val (Node a b c) steps
+  | a == val = Just steps
+  | otherwise = which nextL nextR
+    where
+      nextL = search' val b (steps ++ [StepL])
+      nextR = search' val c (steps ++ [StepR])
+
+which Nothing (Just a) = Just a
+which (Just a) Nothing = Just a
+which Nothing Nothing = Nothing
