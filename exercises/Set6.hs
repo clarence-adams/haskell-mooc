@@ -195,12 +195,20 @@ simplify (RationalNumber a b) = RationalNumber (div a common) (div b common)
 --   signum (RationalNumber 0 2)             ==> RationalNumber 0 1
 
 instance Num RationalNumber where
-  p + q = todo
-  p * q = todo
-  abs q = todo
-  signum q = todo
-  fromInteger x = todo
-  negate q = todo
+  (RationalNumber a b) + (RationalNumber c d) = simplify (RationalNumber ((commonN a b) + (commonN c d)) lcd)
+    where
+      lcd = lcm b d
+      commonN n d  = n * (div lcd d)
+  (RationalNumber a b) * (RationalNumber c d) = simplify (RationalNumber (a * c) (b * d))
+  abs (RationalNumber a b)
+    | a > 0 || a == 0 = RationalNumber a b
+    | otherwise = RationalNumber (a * (-1)) b
+  signum (RationalNumber a b)
+    | a > 0 = 1
+    | a < 0 = -1
+    | otherwise = 0
+  fromInteger x = RationalNumber x 1
+  negate (RationalNumber a b) = RationalNumber (0 - a) b
 
 ------------------------------------------------------------------------------
 -- Ex 11: a class for adding things. Define a class Addable with a
@@ -214,6 +222,17 @@ instance Num RationalNumber where
 --   add 1 zero             ==>  1
 --   add [1,2] [3,4]        ==>  [1,2,3,4]
 --   add zero [True,False]  ==>  [True,False]
+class Addable a where
+  zero :: a
+  add :: a -> a -> a
+
+instance Addable Integer where
+  zero = 0
+  add a b = a + b
+
+instance Addable [a] where
+  zero = []
+  add a b = a ++ b
 
 
 ------------------------------------------------------------------------------
@@ -245,4 +264,21 @@ data Color = Red | Green | Blue
   deriving (Show, Eq)
 data Suit = Club | Spade | Diamond | Heart
   deriving (Show, Eq)
+
+class Cycle a where
+  step :: a -> a
+  stepMany :: Int -> a -> a
+  stepMany 0 c = c
+  stepMany i c = stepMany (i - 1) (step c)
+
+instance Cycle Color where
+  step Red = Green
+  step Green = Blue
+  step Blue = Red
+
+instance Cycle Suit where
+  step Club = Spade
+  step Spade = Diamond
+  step Diamond = Heart
+  step Heart = Club
 
